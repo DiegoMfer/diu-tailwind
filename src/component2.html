@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector de Horario de Entrega</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.4.1/dist/flowbite.js"></script>
+</head>
+<body class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 flex items-center justify-center min-h-screen">
+    <!-- Componente de Selección de Horarios -->
+    <div class="w-full max-w-lg p-8 bg-white rounded-3xl shadow-2xl hover:shadow-indigo-500/50 transition duration-300 transform hover:-translate-y-1 relative">
+        <h2 class="text-3xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pulse">
+            Preferencias de Entrega de Paquetes
+        </h2>
+
+        <!-- Selección de Fecha 1 -->
+        <div class="relative mb-6">
+            <label for="fecha1" class="block text-lg font-medium text-gray-600">Fecha de entrega inicial</label>
+            <input type="date" id="fecha1" class="mt-2 w-full p-3 bg-gray-50 border rounded-lg shadow-md text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-transform transform hover:scale-105 focus:scale-105 focus:outline-none" onchange="actualizarFechaMaxima()" />
+        </div>
+
+        <!-- Selección de Fecha 2 -->
+        <div class="relative mb-6">
+            <label for="fecha2" class="block text-lg font-medium text-gray-600">Fecha de entrega final (máx. 7 días después)</label>
+            <input type="date" id="fecha2" class="mt-2 w-full p-3 bg-gray-50 border rounded-lg shadow-md text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-transform transform hover:scale-105 focus:scale-105 focus:outline-none" disabled />
+        </div>
+
+        <!-- Preferencia de entrega para Fecha 1 -->
+        <div class="relative mb-6">
+            <label for="horarioFecha1" class="block text-lg font-medium text-gray-600">Preferencia de entrega para Fecha 1</label>
+            <select id="horarioFecha1" class="mt-2 w-full p-3 bg-gray-50 border rounded-lg shadow-md text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-transform transform hover:scale-105 focus:scale-105 focus:outline-none" multiple>
+                <option value="mañana">Mañana</option>
+                <option value="tarde">Tarde</option>
+                <option value="noche">Noche</option>
+            </select>
+        </div>
+
+        <!-- Preferencia de entrega para Fecha 2 -->
+        <div class="relative mb-6">
+            <label for="horarioFecha2" class="block text-lg font-medium text-gray-600">Preferencia de entrega para Fecha 2</label>
+            <select id="horarioFecha2" class="mt-2 w-full p-3 bg-gray-50 border rounded-lg shadow-md text-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-transform transform hover:scale-105 focus:scale-105 focus:outline-none" multiple>
+                <option value="mañana">Mañana</option>
+                <option value="tarde">Tarde</option>
+                <option value="noche">Noche</option>
+            </select>
+        </div>
+
+        <!-- Botón de Confirmación con efecto de fuego -->
+        <button id="confirmButton" type="button" onclick="confirmarSeleccion()" class="w-full py-3 px-5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:ring-4 focus:ring-indigo-300 active:scale-95 relative overflow-hidden">
+            Confirmar Selección
+        </button>
+
+        <!-- Información de Selección -->
+        <div id="selection-summary" class="mt-6">
+            <h3 class="text-xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">Resumen de Selección</h3>
+            <p id="selection-result" class="text-gray-800 font-medium">Aquí se mostrará el resumen de selección.</p>
+        </div>
+    </div>
+
+    <script>
+        // Función para actualizar la fecha máxima de "fecha2"
+        function actualizarFechaMaxima() {
+            const fecha1 = document.getElementById("fecha1").value;
+            const fecha2 = document.getElementById("fecha2");
+            if (fecha1) {
+                const fechaInicial = new Date(fecha1);
+                const fechaMax = new Date(fechaInicial);
+                fechaMax.setDate(fechaInicial.getDate() + 7);
+
+                fecha2.min = fecha1;
+                fecha2.max = fechaMax.toISOString().split("T")[0];
+                fecha2.disabled = false;
+                fecha2.classList.add("ring-2", "ring-indigo-500");
+            } else {
+                fecha2.value = "";
+                fecha2.disabled = true;
+                fecha2.classList.remove("ring-2", "ring-indigo-500");
+            }
+        }
+
+        // Función para confirmar la selección con efecto de fuego
+        function confirmarSeleccion() {
+            const fecha1 = document.getElementById("fecha1").value;
+            const fecha2 = document.getElementById("fecha2").value;
+            const preferenciasFecha1 = Array.from(document.getElementById("horarioFecha1").selectedOptions).map(opt => opt.value);
+            const preferenciasFecha2 = Array.from(document.getElementById("horarioFecha2").selectedOptions).map(opt => opt.value);
+
+            if (!fecha1 || !fecha2) {
+                alert("Por favor, selecciona ambas fechas de entrega.");
+                return;
+            }
+            if (preferenciasFecha1.length === 0 || preferenciasFecha2.length === 0) {
+                alert("Por favor, selecciona al menos una preferencia de entrega para cada fecha.");
+                return;
+            }
+
+            // Mostrar resumen en el contenedor de resultados
+            const result = `Fecha 1: ${fecha1} (preferencias: ${preferenciasFecha1.join(", ")})<br>Fecha 2: ${fecha2} (preferencias: ${preferenciasFecha2.join(", ")})`;
+            document.getElementById("selection-result").innerHTML = result;
+
+            // Crear efecto de "fuego" en el botón
+            const button = document.getElementById('confirmButton');
+            for (let i = 0; i < 15; i++) {
+                const fireParticle = document.createElement('span');
+                fireParticle.classList.add(
+                    'absolute', 'w-2', 'h-2', 'bg-yellow-400', 'rounded-full', 'opacity-75', 
+                    'transform', 'animate-pulse', 'transition', 'duration-500', 'ease-out'
+                );
+
+                // Posición aleatoria y movimiento hacia arriba
+                fireParticle.style.left = `${Math.random() * 100}%`;
+                fireParticle.style.top = `${Math.random() * 20}%`;
+                fireParticle.style.transform = `translate(${Math.random() * 30 - 15}px, ${-Math.random() * 60}px)`;
+
+                // Añadir la partícula al botón y remover después de 500 ms
+                button.appendChild(fireParticle);
+                setTimeout(() => fireParticle.remove(), 500);
+            }
+        }
+    </script>
+</body>
+</html>
